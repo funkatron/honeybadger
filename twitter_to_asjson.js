@@ -6,16 +6,15 @@ fs.readFile('./data/public_timeline.json', 'utf8', function(err, data) {
 		throw err;
 	}
 	var public_tl = JSON.parse(data);
-	
+
 	for (var i=0; i < public_tl.length; i++) {
 		console.dir(twitterStatusToAS(public_tl[i]));
 	}
-	
+
 });
 
-
 var twitterStatusToAS = function(ts) {
-	
+
 	var as = {
 		"title":ts.text,
 		'url': 'http://twitter.com/'+ts.user.screen_name+'status/'+ts.user.id_str,
@@ -29,7 +28,8 @@ var twitterStatusToAS = function(ts) {
 				"width": 48,
 				"height": 48
 			},
-			"displayName": ts.user.name
+			"displayName": ts.user.name,
+			"contact-entry": twitterUserToPoCo(ts.user),
 		},
 		"verb": "post",
 		"object": {
@@ -42,11 +42,9 @@ var twitterStatusToAS = function(ts) {
 			"id": "tag:twitter.com",
 			"displayName": "Twitter"
 		},
-		'generator': {
-			ts.source
-		},
+		"position": twitterGeoToPosition(ts.geo),
+		"generator": twitterSourceToGenerator(ts.source),
 		'X-twitter.com': {
-			place: ts.place,
 			in_reply_to_user_id: ts.in_reply_to_user_id,
 			favorited: ts.favorited,
 			coordinates: ts.coordinates,
@@ -54,13 +52,12 @@ var twitterStatusToAS = function(ts) {
 			in_reply_to_status_id_str: ts.in_reply_to_status_id_str,
 			source: ts.source,
 			contributors: ts.contributors,
-			geo: ts.geo,
 			retweeted: ts.retweeted,
 			in_reply_to_status_id: ts.in_reply_to_status_id,
 			in_reply_to_user_id_str: ts.in_reply_to_user_id_str,
 			retweeted: ts.retweeted,
 			truncated: ts.truncated,
-			user: {
+			"user": {
 				default_profile: ts.user.default_profile,
 				lang: ts.user.lang,
 				profile_use_background_image: ts.user.profile_use_background_image,
@@ -85,13 +82,9 @@ var twitterStatusToAS = function(ts) {
 				notifications: ts.user.notifications,
 				profile_background_tile: ts.user.profile_background_tile,
 				favourites_count: ts.user.favourites_count,
-				screen_name: ts.user.screen_name,
 				'protected': ts.user['protected'],
 				profile_link_color: ts.user.profile_link_color,
-				location: ts.user.location,
-				default_profile_image: ts.user.default_profile_image,
 				profile_sidebar_border_color: ts.user.profile_sidebar_border_color,
-				utc_offset: ts.utc_offset
 			}
 		}
 	};
@@ -99,3 +92,41 @@ var twitterStatusToAS = function(ts) {
 	return as;
 };
 
+// @fixme: needs to parse and fill an obj structure
+var twitterSourceToGenerator = function(source)
+{
+	var generator = {
+		"url": source
+	};
+
+	return generator;
+
+};
+
+// @fixme needs to convert geopoint to ISO 6709
+var twitterGeoToPosition = function(geo) {
+	return geo;
+}
+
+// Portable Contacts in JSON seems to be the favored way to represent
+// profile data. I suspect it will be made an "official" AS extension.
+// http://portablecontacts.net/draft-schema.html --Zach
+var twitterUserToPoCo = function(user) {
+
+	var poco = {
+		"id": user.id,
+		"displayName": user.name,
+		"preferredUsername": user.screen_name,
+		"aboutMe": user.description,
+		"currentLocation": (user.location) ? user.location : null, // XXX: Why is this sometimes empty?
+		 "photos": [
+			{
+				"value": user.default_profile_image,
+				"type": "thumbnail"
+			}
+		],
+		"utcOffset": user.utc_offset
+	};
+
+	return poco;
+};
