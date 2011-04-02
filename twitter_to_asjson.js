@@ -1,4 +1,5 @@
 // get the fs module
+/*
 var fs = require('fs');
 
 fs.readFile('./data/public_timeline.json', 'utf8', function(err, data) {
@@ -12,8 +13,9 @@ fs.readFile('./data/public_timeline.json', 'utf8', function(err, data) {
 	}
 
 });
+*/
 
-var twitterStatusToAS = function(ts) {
+exports.twitterStatusToAS = function(ts) {
 
 	var as = {
 		"title":ts.text,
