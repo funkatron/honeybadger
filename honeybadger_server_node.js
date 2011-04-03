@@ -38,6 +38,7 @@ console.log('Server running at http://'+process.argv[2]+':'+process.argv[3]+'/')
  * @param object res Response object for the http server
  */
 function dispatch_get(req, res) {
+	
 	var dl = new node_get(req_query.resource);
 	dl.asString(process_input);
 }
@@ -53,12 +54,16 @@ function process_input() {
 	}
 	
 	var inputResponse = JSON.parse(arguments[1]);
-	
+	var output = [];
 	for(var i in inputResponse) {
 		var tweet = inputResponse[i];
 		var as = twitterService.twitterStatusToAS(tweet);
-		response.write(JSON.stringify(as));
-		break;
+		output.push(as);
 	}
-	response.end()
+	response.write(JSON.stringify(output));
+	
+	inputResponse = null;
+	output = null;
+	
+	response.end();
 }
